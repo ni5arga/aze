@@ -14,7 +14,7 @@ src/
 │   └── logger.ts              pino logger
 ├── messaging/
 │   ├── types.ts               ParsedMessage / Media types
-│   ├── parser.ts              normalizes a WAMessage
+│   ├── parser.ts              normalizes a WAMessage (incl. LID → PN)
 │   └── sender.ts              ergonomic send/reply/react helpers
 ├── commands/
 │   ├── types.ts               Command interface + defineCommand()
@@ -22,21 +22,43 @@ src/
 │   ├── loader.ts              filesystem auto-discovery
 │   └── modules/
 │       ├── general/           ping, help, echo, uptime
+│       ├── anime/             waifu, maid, uniform, animeinfo, character
 │       ├── group/             tagall, groupinfo
+│       ├── moderation/        promote, demote, remove, setname, setdesc
 │       ├── media/             sticker
-│       └── owner/             shutdown
+│       └── owner/             shutdown, restart, broadcast, ban, unban, banlist
 ├── middleware/
 │   ├── pipeline.ts            koa-style composition
 │   ├── logger.ts              command timing + error capture
+│   ├── blacklist.ts           short-circuit banned senders
 │   ├── ratelimit.ts           per-(command, user) cooldown
 │   └── permission.ts          owner / admin / group / private gates
 ├── events/
-│   ├── messages.ts            messages.upsert dispatcher
+│   ├── messages.ts            messages.upsert dispatcher + chat tracker
 │   ├── connection.ts          QR, open/close, reconnect signal
 │   ├── groups.ts              welcome + group upsert
 │   └── calls.ts               auto-reject incoming calls
-└── utils/                     jid, text, time helpers
+├── services/
+│   ├── http.ts                fetch wrapper for JSON + binary
+│   ├── waifu.ts               waifu.im (SFW only)
+│   └── jikan.ts               jikan.moe v4 (anime + character search)
+├── state/
+│   ├── store.ts               atomic JSON-file persistence
+│   ├── blacklist.ts           ban list (phone-keyed)
+│   └── chats.ts               known-chats tracker for broadcast
+└── utils/                     jid, targets, text, time helpers
 ```
+
+## Commands
+
+| category | commands |
+|---|---|
+| general | `ping`, `help`, `echo`, `uptime` |
+| anime | `waifu`, `maid`, `uniform`, `animeinfo`, `character` |
+| group | `tagall`, `groupinfo` |
+| moderation | `promote`, `demote`, `remove`, `setname`, `setdesc` |
+| media | `sticker` |
+| owner | `shutdown`, `restart`, `broadcast`, `ban`, `unban`, `banlist` |
 
 ## Setup
 
