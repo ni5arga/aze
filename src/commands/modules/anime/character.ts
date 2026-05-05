@@ -16,17 +16,21 @@ export default defineCommand({
     const result = await searchCharacter(query)
     if (!result) return send.reply(message, `No character found for "${query}".`)
 
-    const lines = [
-      `*${result.name}*${result.name_kanji ? ` (${result.name_kanji})` : ''}`,
-      result.nicknames?.length ? `aliases: ${result.nicknames.join(', ')}` : '',
-      result.favorites ? `favorites: ${result.favorites}` : '',
-      '',
-      result.about ? truncate(result.about, 700) : '',
-      '',
-      result.url
-    ].filter(Boolean)
+    const meta: Array<[string, string]> = []
+    if (result.name_kanji) meta.push(['kanji', result.name_kanji])
+    if (result.nicknames?.length) meta.push(['aliases', result.nicknames.join(', ')])
+    if (typeof result.favorites === 'number') meta.push(['favorites', String(result.favorites)])
 
-    const caption = lines.join('\n')
+    const parts: string[] = [`*${result.name}*`]
+    if (meta.length) {
+      parts.push('```')
+      parts.push(meta.map(([k, v]) => `${k.padEnd(9)} ${v}`).join('\n'))
+      parts.push('```')
+    }
+    if (result.about) parts.push(truncate(result.about, 700))
+    parts.push('', result.url)
+
+    const caption = parts.join('\n')
 
     try {
       const { data } = await getBuffer(result.images.jpg.image_url)

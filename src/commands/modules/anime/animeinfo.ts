@@ -16,24 +16,35 @@ export default defineCommand({
     const anime = await searchAnime(query)
     if (!anime) return send.reply(message, `No results for "${query}".`)
 
-    const lines = [
-      `*${anime.title}*${anime.title_english && anime.title_english !== anime.title ? ` — _${anime.title_english}_` : ''}`,
-      '',
-      anime.type ? `type: ${anime.type}` : '',
-      anime.episodes ? `episodes: ${anime.episodes}` : '',
-      anime.status ? `status: ${anime.status}` : '',
-      anime.year ? `year: ${anime.year}` : '',
-      anime.score ? `score: ${anime.score}/10` : '',
-      anime.rank ? `rank: #${anime.rank}` : '',
-      anime.genres?.length ? `genres: ${anime.genres.map((g) => g.name).join(', ')}` : '',
-      anime.studios?.length ? `studios: ${anime.studios.map((s) => s.name).join(', ')}` : '',
-      '',
+    const meta: Array<[string, string]> = []
+    if (anime.type) meta.push(['type', anime.type])
+    if (anime.episodes) meta.push(['episodes', String(anime.episodes)])
+    if (anime.status) meta.push(['status', anime.status])
+    if (anime.year) meta.push(['year', String(anime.year)])
+    if (anime.score)
+      meta.push(['score', `${anime.score}/10${anime.rank ? `  (#${anime.rank})` : ''}`])
+    if (anime.genres?.length) meta.push(['genres', anime.genres.map((g) => g.name).join(', ')])
+    if (anime.studios?.length) meta.push(['studios', anime.studios.map((s) => s.name).join(', ')])
+
+    const block = meta.map(([k, v]) => `${k.padEnd(8)} ${v}`).join('\n')
+
+    const titleLine =
+      anime.title_english && anime.title_english !== anime.title
+        ? `*${anime.title}*  _${anime.title_english}_`
+        : `*${anime.title}*`
+
+    const caption = [
+      titleLine,
+      '```',
+      block,
+      '```',
       anime.synopsis ? truncate(anime.synopsis, 600) : '',
       '',
       anime.url
-    ].filter(Boolean)
+    ]
+      .filter(Boolean)
+      .join('\n')
 
-    const caption = lines.join('\n')
     const cover = anime.images.jpg.large_image_url ?? anime.images.jpg.image_url
 
     try {
