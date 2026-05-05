@@ -25,11 +25,19 @@ interface WaifuResponse {
   items: WaifuImage[]
 }
 
+const BARE_REDDIT = /^https?:\/\/(?:www\.)?reddit\.com\/([a-z0-9]+)\/?$/i
+
+const normalizeSource = (source: string | null | undefined): string | undefined => {
+  if (!source) return undefined
+  const match = source.match(BARE_REDDIT)
+  return match ? `https://redd.it/${match[1]}` : source
+}
+
 export const fetchWaifu = async (tag: WaifuTag): Promise<WaifuImage> => {
   const url = `https://api.waifu.im/images?included_tags=${encodeURIComponent(tag)}&isNsfw=false`
   const data = await getJson<WaifuResponse>(url)
   const image = data.items?.[0]
   if (!image) throw new Error('No image returned')
   if (image.isNsfw) throw new Error('NSFW image filtered')
-  return image
+  return { ...image, source: normalizeSource(image.source) ?? null }
 }
