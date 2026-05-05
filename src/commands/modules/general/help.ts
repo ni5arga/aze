@@ -37,7 +37,8 @@ export default defineCommand({
     if (args[0]) {
       const cmd = registry.resolve(args[0])
       if (!cmd) return send.reply(message, `No command named *${args[0]}*.`)
-      return send.reply(message, renderDetail(cmd, prefix))
+      await send.send(message.chat, { text: renderDetail(cmd, prefix) })
+      return
     }
 
     const groups = registry.byCategory()
@@ -62,6 +63,6 @@ export default defineCommand({
     }
 
     out.push(`_tip:_ \`${prefix}help <command>\` for details`)
-    await send.reply(message, out.join('\n').trim())
+    await send.send(message.chat, { text: out.join('\n').trim() })
   }
 })
