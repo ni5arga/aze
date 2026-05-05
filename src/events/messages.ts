@@ -4,6 +4,7 @@ import { env } from '../config/env.js'
 import { parseMessage } from '../messaging/parser.js'
 import { Sender } from '../messaging/sender.js'
 import { chats } from '../state/chats.js'
+import { messagesCache } from '../state/messages-cache.js'
 import type { CommandRegistry } from '../commands/registry.js'
 import type { Pipeline } from '../middleware/pipeline.js'
 import type { PipelineContext } from '../middleware/types.js'
@@ -20,7 +21,11 @@ export const handleMessages = (
 
     for (const raw of messages) {
       const parsed = parseMessage(raw, sock, env.prefix)
-      if (!parsed || parsed.fromMe) continue
+      if (!parsed) continue
+
+      messagesCache.push(parsed.chat, parsed.key, parsed.sender, parsed.fromMe)
+
+      if (parsed.fromMe) continue
 
       void chats.track(parsed.chat).catch(() => {})
 
