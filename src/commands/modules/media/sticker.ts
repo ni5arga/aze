@@ -1,4 +1,6 @@
+import { Sticker, StickerTypes } from 'wa-sticker-formatter'
 import { defineCommand } from '../../types.js'
+import { env } from '../../../config/env.js'
 
 export default defineCommand({
   name: 'sticker',
@@ -11,7 +13,16 @@ export default defineCommand({
     if (!target || (target.kind !== 'image' && target.kind !== 'video')) {
       return send.reply(message, 'Reply to or send an image/video.')
     }
+
     const buffer = await target.download()
-    await send.reply(message, { sticker: buffer })
+    const sticker = new Sticker(buffer, {
+      pack: env.botName,
+      author: env.botName,
+      type: StickerTypes.FULL,
+      quality: 60
+    })
+
+    const out = await sticker.toBuffer()
+    await send.reply(message, { sticker: out })
   }
 })
